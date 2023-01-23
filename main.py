@@ -7,7 +7,7 @@ print("--------<prepating data>--------")
 
 xs = [-7, -3, -2, -5, -2,  1,  3,  3,  1,  5]
 ys = [ 2,  3,  1, -2, -4,  2,  5,  1, -1, -2]
-ts = [ 1,  1,  0,  0,  0,  1,  1,  1,  1,  1]
+ts = [ 1,  1,  0,  0,  0,  1,  1,  0,  0,  1]
 N = len(xs)
 
 data_ps = np.array([[xs[i],ys[i]] for i in range(N)])
@@ -28,7 +28,7 @@ print()
 #p = Perceptron(0.01, 10)
 #p.learn(data_ps, data_ts)
 
-bp = Beter_Perceptron(0.01,300)
+bp = Beter_Perceptron(0.2, 1000)
 bp.learn(b_data_ps, b_data_ts)
 
 
@@ -66,7 +66,7 @@ ax.plot(xs_t, ys_t, "^", color="blue")
 
 
 
-resolution = 50
+resolution = 100
 
 y, x = np.meshgrid(np.linspace(-10, 10, resolution), np.linspace(-10, 10, resolution))
 

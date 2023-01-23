@@ -3,7 +3,7 @@ from activate_functions import *
 class Node:
     def __init__(self, n):
         self.activation_func = sigmod_func
-        self.weights = np.array([(random.random()-0.5)*1 for i in range(n)])
+        self.weights = np.array([(random.random()-0.5)*3 for i in range(n)])
     
 
     def get(self, X):
@@ -23,19 +23,19 @@ class Beter_Perceptron:
         self.n_iters = n_iters 
         self.activation_func = sigmod_func
         self.nodes = [
-            [Node(3), Node(3), Node(3)],
-            [Node(4),Node(4)],
-            [Node(3)]
+            [Node(3),Node(3),Node(3)],
+            [Node(4),Node(4),Node(4)],
+            [Node(4)]
             ]
  
     def learn(self, X, types): 
         
         print("-------<start learning>-------")
 
-        type_ = np.where(types > 0, 1, 0) 
+        type_ = np.where(types > 0, 1, 0)
  
         #learn weights 
-        for _ in range(self.n_iters): 
+        for _ in range(self.n_iters):
             #print("iteration ", _, ">-----------")
             for idx, x_i in enumerate(X):
                 self.learn_iteration(x_i, type_[idx])
@@ -44,9 +44,9 @@ class Beter_Perceptron:
         print("-------<end learning>-------")
 
         for _, nodes in enumerate(self.nodes):
-            print("layer ", _)
+            #print("layer ", _)
             for i, node in enumerate(nodes):
-                print("node ", i)   
+                #print("node ", i)   
                 node.disp()
 
 
@@ -65,8 +65,9 @@ class Beter_Perceptron:
 
         b1 = self.nodes[1][0].get(l2)
         b2 = self.nodes[1][1].get(l2)
+        b3 = self.nodes[1][2].get(l2)
 
-        l3 = np.array([b1, b2, 1])
+        l3 = np.array([b1, b2, b3, 1])
 
         c1 = self.nodes[2][0].get(l3)
 
@@ -77,14 +78,15 @@ class Beter_Perceptron:
             for j, node in enumerate(nodes):
                 values[i+1].append(0)
             values[i+1].append(1)
-        print(values)
+        #print(values)
 
         for i, nodes in enumerate(self.nodes):
             for j, node in enumerate(nodes):
                 values[i+1][j] = node.get(values[i])
 
 
-        er1 = type - c1
+        k1 = (type - c1) * c1 * (1 - c1)
+        self.nodes[2][0].weights += k1 * l3 * self.lr
 
         #err_values = []
         #err_values.append([ [ type - values[-1][0] ] ])
@@ -96,63 +98,27 @@ class Beter_Perceptron:
         #            #c = err_values[i][j][k]
         #            err_values[i+1][j+1].append()
         #            self.nodes[i][j].weights[k] += err_values[i]
-
-
-        er21 = self.nodes[2][0].weights[0] * er1
         
-        er22 = self.nodes[2][0].weights[1] * er1
-
-
-        er31 = (self.nodes[1][0].weights[0] * er21) + (self.nodes[1][1].weights[0] * er22)
+        k21 = (k1 * self.nodes[2][0].weights[0]) * b1 * (1 - b1)
+        self.nodes[1][0].weights += k21 * l2 * self.lr
         
-        er32 = (self.nodes[1][0].weights[1] * er21) + (self.nodes[1][1].weights[1] * er22)
+        k22 = (k1 * self.nodes[2][0].weights[1]) * b2 * (1 - b2)
+        self.nodes[1][1].weights += k22 * l2 * self.lr
+
+        k23 = (k1 * self.nodes[2][0].weights[2]) * b3 * (1 - b3)
+        self.nodes[1][1].weights += k23 * l2 * self.lr
+
+
+        k31 = (k21 * self.nodes[1][0].weights[0] + k22 * self.nodes[1][1].weights[0] + k23 * self.nodes[1][2].weights[0]) * a1 * (1 - a1)
+        self.nodes[0][0].weights += k31 * l1 * self.lr
         
-        er33 = (self.nodes[1][0].weights[2] * er21) + (self.nodes[1][1].weights[2] * er22) 
+        k32 = (k21 * self.nodes[1][0].weights[1] + k22 * self.nodes[1][1].weights[1] + k23 * self.nodes[1][2].weights[1]) * a2 * (1 - a2)
+        self.nodes[0][1].weights += k32 * l1 * self.lr
         
-
-        self.nodes[2][0].weights += er1 * l3 * self.lr
-
-        self.nodes[1][0].weights += er21 * l2 * self.lr
-        self.nodes[1][1].weights += er22 * l2 * self.lr
-
-        self.nodes[0][0].weights += er31 * l1 * self.lr
-        self.nodes[0][1].weights += er32 * l1 * self.lr
-        self.nodes[0][2].weights += er33 * l1 * self.lr
-
-        """
-        
-        er1 = type - c1
+        k33 = (k21 * self.nodes[1][0].weights[2] + k22 * self.nodes[1][1].weights[2] + k23 * self.nodes[1][2].weights[2]) * a3 * (1 - a3)   
+        self.nodes[0][2].weights += k33 * l1 * self.lr
         
 
-        er21 = type * self.nodes[2][0].weights[0] - b1
-        
-        er22 = type * self.nodes[2][0].weights[1] - b2
-
-
-
-        er31 = (type * self.nodes[1][0].weights[0] - a1) + (type * self.nodes[1][1].weights[0] - a1)
-        
-        
-        er32 = (type * self.nodes[1][0].weights[1] - a2) + (type * self.nodes[1][1].weights[1] - a2)
-        
-
-        er33 = (type * self.nodes[1][0].weights[2] - a3) + (type * self.nodes[1][1].weights[2] - a3) 
-        
-
-
-        self.nodes[2][0].weights += er1 * l3 * self.lr
-
-        self.nodes[1][0].weights += er21 * l2 * self.lr
-        self.nodes[1][1].weights += er22 * l2 * self.lr
-
-        self.nodes[0][0].weights += er31 * l1 * self.lr
-        self.nodes[0][1].weights += er32 * l1 * self.lr
-
-        self.nodes[0][2].weights += er33 * l1 * self.lr
-
-        """
-
-    
     
     def get(self, X):
 
@@ -170,5 +136,5 @@ class Beter_Perceptron:
             for j, node in enumerate(nodes):
                 values[i+1][j] = node.get(values[i])
 
-        return self.activation_func(values[-1][0])
+        return values[-1][0]
 
